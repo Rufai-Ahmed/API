@@ -1,5 +1,7 @@
 import axios from "axios";
 import http, { IncomingMessage, ServerResponse } from "http";
+import path from "path";
+import fs from "fs";
 
 interface iMessage {
   message: string;
@@ -38,6 +40,16 @@ const server = http.createServer(
           );
 
           if (URL.status) {
+            const avatarUrl = URL.data.avatar_url;
+
+            const getAvatar = await axios.get(avatarUrl, {
+              responseType: "stream",
+            });
+
+            getAvatar.data.pipe(
+              fs.createWriteStream(path.join("./Avatar", `3.jpg`))
+            );
+
             response.data = URL.data;
             res.write(JSON.stringify({ response, status }));
             res.end();

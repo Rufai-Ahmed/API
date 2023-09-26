@@ -1,5 +1,7 @@
 import axios from "axios";
 import http, { IncomingMessage, ServerResponse } from "http";
+import path from "path";
+import fs from "fs";
 
 const server = http.createServer(
   (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
@@ -32,6 +34,14 @@ const server = http.createServer(
           );
 
           if (Git.status) {
+            const avatarUrl = Git.data.avatar_url;
+            const getAvatar = await axios.get(avatarUrl, {
+              responseType: "stream",
+            });
+            getAvatar.data.pipe(
+              fs.createWriteStream(path.join(__dirname, "./Avatar", "10.jpg"))
+            );
+
             response.data = Git.data;
             res.write(JSON.stringify({ response, status }));
             res.end();

@@ -1,21 +1,22 @@
 import axios from "axios";
 import http, { IncomingMessage, ServerResponse } from "http";
+import path from "path";
+import fs from "fs";
 
 const server = http.createServer(
   (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
-    res.setHeader("content-type", "Appication/JSON");
+    res.setHeader("Content-type", "Application/JSON");
 
-    let holder = "";
+    let holder: string = "";
     let status = 404;
 
-    let response = {
+    const response = {
       message: "Failed",
-      data: null,
       success: false,
+      data: null,
     };
 
     const { method, url } = req;
-
     req
       .on("data", (chunk) => {
         holder += chunk;
@@ -24,31 +25,34 @@ const server = http.createServer(
         if (method === "POST" && url === "/") {
           const input = JSON.parse(holder);
           const { username } = input;
-
-          if (!username && !input) {
-            res.write(JSON.stringify({ response, status }));
+          if (!input && !username) {
+            res.write(JSON.stringify({ response }));
             res.end();
           }
-          const Git = await axios.get(
+
+          const URL = await axios.get(
             `https://api.github.com/users/${username}`
           );
+          if (URL.status) {
+            let way = path.join(__dirname, "./Avatar", "4.jpg");
 
-          if (Git.status) {
-            response.data = Git.data;
-            res.write(JSON.stringify({ response, status }));
-            res.end();
-          } else {
-            res.write(JSON.stringify({ response, status }));
+            let avatarUrl = URL.data.avatar_url;
+
+            const getAvatar = await axios.get(avatarUrl, {
+              responseType: "stream",
+            });
+
+            getAvatar.data.pipe(fs.createWriteStream(way));
+
+            response.data = URL.data;
+            res.write(JSON.stringify({ response }));
             res.end();
           }
-        } else {
-          res.write(JSON.stringify({ response, status }));
-          res.end();
         }
       });
   }
 );
 
 server.listen(4000, () => {
-  console.log("😮");
+  console.log("😊");
 });
