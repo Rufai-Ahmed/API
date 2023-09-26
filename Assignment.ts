@@ -30,7 +30,7 @@ const server = http.createServer(
       })
       .on("end", async () => {
         const { method, url } = req;
-        //When I hit a route
+        // When I hit a route
         // if (method === "GET") {
         //   const iniUrl: any = url?.split("/")[1];
         //   const usefulUrl = parseInt(iniUrl);
@@ -61,44 +61,92 @@ const server = http.createServer(
         //   res.write(JSON.stringify({ status, response }));
         //   res.end();
         // }
+
         //All titles should be saved in a .txt file
-        if (method === "GET" && url === "/getTitles") {
-          const fakeStoreApi = await axios.get(
-            "http://fakestoreapi.com/products"
-          );
-          if (fakeStoreApi.status) {
-            const fakeStoreDataTitle = fakeStoreApi.data.map((el) => el.title);
-            const TitleFolder = path.join(__dirname, "Titles");
+        // if (method === "GET" && url === "/getTitles") {
+        //   const fakeStoreApi = await axios.get(
+        //     "http://fakestoreapi.com/products"
+        //   );
+        //   if (fakeStoreApi.status) {
+        //     const fakeStoreDataTitle = fakeStoreApi.data.map((el) => el.title);
+        //     const TitleFolder = path.join(__dirname, "Titles");
 
-            if (!fs.existsSync) {
-              fs.mkdir(TitleFolder, (error) => error);
+        //     if (!fs.existsSync) {
+        //       fs.mkdir(TitleFolder, (error) => error);
+        //     }
+
+        //     fs.writeFile(
+        //       path.join(__dirname, "Titles", "Titles.txt"),
+        //       fakeStoreDataTitle
+        //         .toString()
+        //         .split(",")
+        //         .flatMap((el) => "\n" + el)
+        //         .toString(),
+        //       (error) => {
+        //         console.log(error);
+        //       }
+        //     );
+
+        //     response.message = "Successful";
+        //     response.success = true;
+        //     response.data = fakeStoreDataTitle;
+        //     status = 200;
+        //     res.write(JSON.stringify({ status, response }));
+        //     res.end();
+        //   } else {
+        //     res.write(JSON.stringify({ response, status }));
+        //     res.end();
+        //   }
+        // } else {
+        //   res.write(JSON.stringify({ response, status }));
+        //   res.end;
+        // }
+
+        // if (method === "GET") {
+        //   const iniUrl = url?.split("/")[1];
+        //   const urlForUse = iniUrl?.toString();
+
+        //   const fakeStore = await axios.get("http://fakestoreapi.com/products");
+
+        //   const fakeStoreData = fakeStore.data;
+
+        //   let check = fakeStoreData.some((el) => el.category === urlForUse);
+        //   if (check === true) {
+        //     const Category = fakeStoreData.filter(
+        //       (el) => el.category === urlForUse
+        //     );
+
+        //     response.success = true;
+        //     response.data = Category;
+        //     response.message = "Category needed gotten";
+        //     res.write(JSON.stringify({ response, status }));
+        //     res.end();
+        //   } else {
+        //     res.write(JSON.stringify({ response, status }));
+        //     res.end();
+        //   }
+        // }
+
+        //Download all image
+        if (method === "GET" && url === "/") {
+          const fakeStore = await axios.get("http://fakestoreapi.com/products");
+
+          var count1 = 1;
+          if (fakeStore.status) {
+            for (let i = 1; i < fakeStore.data.length; i++) {
+              const Images = await axios.get(`${fakeStore.data[i].image}`, {
+                responseType: "stream",
+              });
+              Images.data.pipe(
+                fs.createWriteStream(
+                  path.join(__dirname, "./fakeStoreImages", `${count1++}.jpg`)
+                )
+              );
             }
-
-            fs.writeFile(
-              path.join(__dirname, "Titles", "Titles.txt"),
-              fakeStoreDataTitle
-                .toString()
-                .split(",")
-                .flatMap((el) => "\n" + el)
-                .toString(),
-              (error) => {
-                console.log(error);
-              }
-            );
-
-            response.message = "Successful";
-            response.success = true;
-            response.data = fakeStoreDataTitle;
-            status = 200;
-            res.write(JSON.stringify({ status, response }));
-            res.end();
-          } else {
-            res.write(JSON.stringify({ response, status }));
-            res.end();
           }
-        } else {
-          res.write(JSON.stringify({ response, status }));
-          res.end;
+          response.message = "Images downloaded";
+          res.write(JSON.stringify({ response }));
+          res.end();
         }
       });
   }

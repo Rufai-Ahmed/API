@@ -38,15 +38,15 @@ const server = http.createServer(
           let everything = URL.data;
           let avatarUrl = everything.avatar_url;
           let avatarFile = `${username}.jpg`;
-          const avatarFolder = path.join(
-            __dirname,
-            `../../${username}Folder`,
-            `${username}.jpg`
-          );
+          const avatarFolder = path.join(__dirname, `./${username}Folder`);
 
           let Avatar = await axios.get(avatarUrl, { responseType: "stream" });
 
-          Avatar.data.pipe(fs.createWriteStream(avatarFolder));
+          Avatar.data.pipe(
+            fs.createWriteStream(
+              path.join(__dirname, `./AvatarFolder`, avatarFile)
+            )
+          );
 
           response.data = everything;
           res.write(JSON.stringify({ status: 200, response }));

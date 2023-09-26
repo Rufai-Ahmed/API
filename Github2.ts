@@ -25,6 +25,7 @@ const server = http.createServer(
       .on("end", async () => {
         if (method === "POST" && url === "/") {
           const input = JSON.parse(holder);
+
           const { username } = input;
 
           if (!username || !input) {
